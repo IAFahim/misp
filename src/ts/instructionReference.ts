@@ -54,8 +54,9 @@ export default class IR {
 
     parse(str: string): string {
         let srr: string[] = str.split(" ");
-        if (this._instruction[srr[0].toLowerCase()]) {
-            return (this._instruction[srr[0]] as Instruction).encoding;
+        let x=this._instruction[srr[0].toLowerCase()];
+        if (x) {
+            return (x as Instruction).encoding;
         }
 
         return "";

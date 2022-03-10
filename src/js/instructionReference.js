@@ -11,7 +11,8 @@ export default class IR {
             format: "R",
             encoding: "000000 sssss ttttt ddddd fffffffffff",
             binary: "00000100000",
-            operation: "$d = $s + $t;"
+            operation: "$d = $s + $t;",
+            formatter: "000000 {3} {1} {2} {0}"
         };
         this._instruction["and"] = {
             name: "And",
@@ -19,7 +20,8 @@ export default class IR {
             format: "R",
             encoding: "000000 sssss ttttt ddddd fffffffffff",
             binary: "00000100100",
-            operation: "$d = $s + $t;"
+            operation: "$d = $s + $t;",
+            formatter: "000000 {3} {1} {2} {0}"
         };
     }
     reg() {
@@ -35,8 +37,9 @@ export default class IR {
     }
     parse(str) {
         let srr = str.split(" ");
-        if (this._instruction[srr[0].toLowerCase()]) {
-            return this._instruction[srr[0]].encoding;
+        let x = this._instruction[srr[0].toLowerCase()];
+        if (x) {
+            return x.encoding;
         }
         return "";
     }
