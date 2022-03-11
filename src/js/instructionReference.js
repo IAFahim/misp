@@ -1,10 +1,11 @@
 class Instruction {
-    constructor(name, op, type, opcode_or_function_value, operation, rearrange) {
+    constructor(name, op, type, opcode_binary, operation, functionCode_binary) {
         this._name = name;
         this._op = op;
         this._format = type.toLowerCase();
-        this._binary = opcode_or_function_value;
+        this._opcode_binary = opcode_binary;
         this._operation = operation;
+        this._functionCode_binary = functionCode_binary;
         this._order = new Map();
         let position = 0;
     }
@@ -18,7 +19,6 @@ class IR {
     }
     addOp(instruction) {
         this._op[instruction._op] = instruction;
-        console.log(this._op[instruction._op]);
     }
     addInstructionType(type, encoding) {
         this._type[type] = encoding;
@@ -46,21 +46,46 @@ class IR {
         }
     }
     parse_instruction(str) {
+        let out = Array(5);
         let srr = str.split(" ");
-        let x = srr[0].toLowerCase();
-        return this._op[x];
+        let op = srr[0].toLowerCase();
+        let main = this._op[op];
+        if (main._functionCode_binary) {
+            out[0] = main._opcode_binary;
+            out[4] = main._functionCode_binary;
+        }
+        else {
+            out[0] = main._opcode_binary;
+        }
+        out[1] = (this.has_doller_parse(srr[1]));
+        out[2] = (this.has_doller_parse(srr[2]));
+        out[3] = (this.has_doller_parse(srr[3]));
+        let x = out.join(" ");
+        return out.join(" ");
+    }
+    has_doller_parse(str) {
+        if (str.charAt(0) == '$') {
+            return this._register[str.substring(1, str.length)];
+        }
+        return this._register[str];
     }
 }
 let ir = new IR(32);
+ir.addRegister('zero', 0);
+ir.addRegister('0', 0);
 ir.addRegisterRange("t0-t5", 10);
-let add = new Instruction("Add", "add", "R", "00000100000", "$d = $s + $t;", "0dstf");
-ir.addOp(add);
-console.log(ir.parse_instruction("add $t0 $t0 $0"));
+let add = new Instruction("Add", "add", "R", "000000", "d = s + t;", "00000100000");
 let and = {
     _name: "And",
     _op: "and",
     _format: "R",
-    _binary: "00000100100",
-    _operation: "$d = $s + $t;",
+    _opcode_binary: "000000",
+    _operation: "d = s & t",
+    _functionCode_binary: "00000100100",
 };
+ir.addInstructionType("R", "000000 sssss ttttt ddddd fffffffffff");
+ir.addOp(add);
+ir.addOp(and);
+console.log(ir.parse_instruction("add $t0 $t0 $0"));
+console.log(ir.parse_instruction("and $t0 $t0 $0"));
 //# sourceMappingURL=instructionReference.js.map
